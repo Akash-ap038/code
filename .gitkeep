@@ -1,0 +1,74 @@
+program pbox
+		implicit real*8(a-h, o-z)
+		character ch
+		common h,v0,al,n
+		pi=acos(-1.0)
+		!V(x)=v0*x/al
+		al=10.0 !lenth of box
+		h=0.001 !step size
+		n=int(al/h+.5) 
+		eps=0.0001
+		v0=10.0000
+	
+		!sughting method
+		E3=0.001  !arbitarily chosen
+		E1=E3+0.1
+		E2=E1+0.1
+		
+2		f1=sil(E1)
+		f2=sil(E2)
+		E3=(f1*E2-f2*E1)/(f1-f2)
+		if(abs(E3-E2).le.eps) then
+		write(*,*)' eigenvalue converged:',E3
+		goto 3
+		else
+		E1=E2
+		E2=E3
+		goto 2
+		end if
+		!normlizetion cofficiant
+	
+3		si0=0.0  !arbitarily chosen
+		si1=1.0  !arbitarily chosen
+		x=0.0 
+		sum=0.0
+		do j=1 ,int(n)
+		si2=(2 - h**2*(E3+v0*x/al))*si1-si0
+		sum=sum+si0*si0
+		si0=si1
+		si1=si2
+		x=x+h
+		end do
+		an=1/sqrt(sum*h)
+		
+	! eigen wave function
+	
+		si0=0.0  !arbitarily chosen
+		si1=1.0  !arbitarily chosen
+		x=0.0
+		open(1,file='si3.dat')
+		do i=1 ,n
+		si2=(2 - h**2*(E3+v0*x/al))*si1-si0
+		write(1,*)x,an*si1
+		si0=si1
+		si1=si2
+		x=x+h
+		end do
+		end program pbox
+	
+	!  
+		function sil(E)
+		implicit real*8(a-h, o-z)
+		common h,v0,al,n
+		si0=0.0  !arbitarily chosen
+		si1=1.0  !arbitarily chosen
+		x=0.0
+    	do j=1,n
+		si2=(2 - h**2*(E+v0*x/al))*si1-si0
+		si0=si1
+		si1=si2
+		x=x+h
+		end do
+		sil=si1
+		return
+		end function sil
